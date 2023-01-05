@@ -74,6 +74,39 @@ int readCardId(char * bus, int slot)
     return ((pos[1] << 8) | pos[0]);
 }
 
+
+/*
+ *  NAME: setCardSubAddress
+ * 
+ *  INPUTS:
+ *      fd         - The open bus handle
+ *      slot       - The slot number from the parent connection descriptor.
+ *                   It should be a value of 1 through 8, with 0 being used
+ *                   for the Standard I/O Planar.
+ *		subaddress - The 16 bit value of the POS[6-7] subaddress field
+ *
+ * RETURNS: Returns 0 in case of success.
+ */
+int setCardSubAddress(int fd, int slot, unsigned short subaddress)
+{
+	MACH_DD_IO mddRecord;
+	int rc;
+
+	mddRecord.md_size = 2; 
+	mddRecord.md_incr = MV_BYTE;
+	mddRecord.md_data = (char *)subaddress;      
+	mddRecord.md_addr = POSREG(6, slot);
+
+	if ((rc = ioctl(fd, MIOCCPUT, &mddRecord)) < 0)
+    {
+        fprintf(stderr, "Error in MIOCCPUT ioctl: %s\n", strerror(errno));
+		return -1; 
+    }
+    
+	return 0;
+}
+
+
 /*
  *  NAME: readCardPos
  * 
@@ -101,6 +134,8 @@ int readCardPos(char * bus, int slot)
         fprintf(stderr, "Error opening bus.\n");
 		return -1;
     }
+	
+	setCardSubAddress(fd, slot, 0x0000);
 
 	mddRecord.md_size = 8; 
 	mddRecord.md_incr = MV_BYTE;
@@ -153,5 +188,4 @@ int readCardPos(char * bus, int slot)
 
     return 0;
 }
-
 
