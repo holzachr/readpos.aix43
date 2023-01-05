@@ -94,7 +94,7 @@ int setCardSubAddress(int fd, int slot, unsigned short subaddress)
 
 	mddRecord.md_size = 2; 
 	mddRecord.md_incr = MV_BYTE;
-	mddRecord.md_data = (char *)subaddress;      
+	mddRecord.md_data = (char *)&subaddress;      
 	mddRecord.md_addr = POSREG(6, slot);
 
 	if ((rc = ioctl(fd, MIOCCPUT, &mddRecord)) < 0)
